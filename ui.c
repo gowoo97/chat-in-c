@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
      
 
     wrefresh(snakeys_world);
- mvprintw(1,1,"hello");
+    mvprintw(30,50,"hello");
     getstr(msg); 
  
     getch();

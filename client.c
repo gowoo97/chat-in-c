@@ -14,9 +14,9 @@ void* send_msg(void* arg);
 void* recv_msg(void* arg);
 
 
-char name[20];
+char ID[20];
 char msg[BUF_SIZE];
-
+char text[200];
 
 
 
@@ -25,8 +25,10 @@ int main(){
 	struct sockaddr_in serv_addr;
 	pthread_t snd_thread,rcv_thread;
 	void* thread_return;
-
-
+	int len;
+	printf("ID입력:");
+	fgets(ID,sizeof(ID)-1,stdin);
+	ID[strlen(ID)-1]='\0';
 	sock=socket(AF_INET,SOCK_STREAM,0);
 		
 	memset(&serv_addr,0,sizeof(serv_addr));	
@@ -53,8 +55,13 @@ void* send_msg(void* arg){
 	
 	while(1){
 		fgets(msg,BUF_SIZE,stdin);
-
-		write(sock,msg,strlen(msg));
+		
+		strcpy(text,ID);
+		strcat(text,":");
+		strcat(text,msg);	
+	//	sprintf(text,"%s:%s",ID,msg);
+			
+		write(sock,text,strlen(text));
 	
 	
 	}	
