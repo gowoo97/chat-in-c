@@ -6,6 +6,9 @@
 #include<sys/socket.h>
 #include<pthread.h>
 #include<ncurses.h>
+#include<sys/types.h>
+#include<sys/stat.h>
+#include<fcntl.h>
 #define BUF_SIZE 100
 
 
@@ -26,6 +29,10 @@ int main(){
 	pthread_t snd_thread,rcv_thread;
 	void* thread_return;
 	int len;
+	
+//	initscr();
+	
+
 	printf("ID입력:");
 	fgets(ID,sizeof(ID)-1,stdin);
 	ID[strlen(ID)-1]='\0';
@@ -52,16 +59,43 @@ int main(){
 
 void* send_msg(void* arg){
 	int sock=*((int*)arg);	
-	
+	char *tmp;
+	FILE *file;
+	int file_len,i,size;
+	char buf[20];
 	while(1){
 		fgets(msg,BUF_SIZE,stdin);
-		
 		strcpy(text,ID);
 		strcat(text,":");
 		strcat(text,msg);	
-	//	sprintf(text,"%s:%s",ID,msg);
 			
-		write(sock,text,strlen(text));
+		write(sock,text,strlen(text));//name:msg
+
+
+		if(!strncmp(msg,"/send",5)){//메세지가 send명령이면
+			tmp=strchr(msg,' ');
+			tmp++;
+			strcpy(buf,tmp);
+			i=strlen(buf);
+			buf[i-1]='\0';
+			file=fopen(buf,"rb");
+		
+			fseek(file,0,SEEK_END);
+			file_len=ftell(file);
+			fseek(file,0,SEEK_SET);
+
+			write(sock,&file_len,sizeof(file_len));//파일 크기 전송
+			while(1){
+				size=fread(buf,sizeof(char),sizeof(buf),file);
+				write(sock,buf,size);	
+				if(feof(file))
+					break;
+			}
+
+
+			fclose(file);
+			
+		}
 	
 	
 	}	
@@ -79,7 +113,7 @@ void* recv_msg(void* arg){
 		str_len=read(sock,msg,BUF_SIZE-1);
 		if(str_len==-1)
 			return (void*)-1;
-		msg[str_len]=0;
+		msg[str_len]='\0';
 		fputs(msg,stdout);
 	
 	}
