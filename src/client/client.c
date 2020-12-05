@@ -20,8 +20,8 @@ void* recv_msg(void* arg);
 char ID[20];
 char msg[BUF_SIZE];
 char text[200];
-
-
+int my_sock;
+pthread_mutex_t mutx;
 
 int main(){
 	int sock;
@@ -31,7 +31,7 @@ int main(){
 	int len;
 	
 //	initscr();
-	
+	pthread_mutex_init(&mutx,NULL);
 
 	printf("ID입력:");
 	fgets(ID,sizeof(ID)-1,stdin);
@@ -47,7 +47,7 @@ int main(){
 		perror("conncet");
 		exit(1);
 	}
-
+	
 	pthread_create(&snd_thread,NULL,send_msg,(void*)&sock);
 	pthread_create(&rcv_thread,NULL,recv_msg,(void*)&sock);
 	pthread_join(snd_thread,&thread_return);
@@ -95,7 +95,34 @@ void* send_msg(void* arg){
 
 			fclose(file);
 			
+		
 		}
+
+	/*	if(!strncmp(msg,"/down",5)){
+			pthread_mutex_lock(&mutx);
+			printf("ggggggggggggggggggggggggggg\n");
+			size=0;
+			tmp=strchr(msg,' ');
+			tmp++;
+			strcpy(buf,tmp);
+			printf("buf=%s\n",buf);
+			i=strlen(buf);
+			printf("strlen=%d",i);
+			buf[i-1]='\0';	
+			file=fopen(buf,"wb");
+			
+
+			read(sock,&file_len,sizeof(int));
+			printf("file len=%d",file_len);
+			while(file_len>size){
+				size+=read(sock,buf,sizeof(buf));
+				fwrite(buf,sizeof(char),sizeof(buf),file);
+			}
+
+			fclose(file);
+			pthread_mutex_unlock(&mutx);
+
+		}*/
 	
 	
 	}	
@@ -105,16 +132,45 @@ void* send_msg(void* arg){
 
 void* recv_msg(void* arg){
 
-	int sock=*((int*)arg);
+	int sock=*((int*)arg),i,file_len,size;
 	char msg[BUF_SIZE];
 	int str_len;
+	char *tmp;
+	char buf[20];
+	FILE *file;
 	while(1){
-	
+		
+		pthread_mutex_lock(&mutx);
+		size=0;
 		str_len=read(sock,msg,BUF_SIZE-1);
 		if(str_len==-1)
 			return (void*)-1;
 		msg[str_len]='\0';
 		fputs(msg,stdout);
+
+		tmp=strchr(msg,':');
+		tmp++;
+		strcpy(buf,tmp);
+
+		if(!strncmp(buf,"/down",5)){
+			tmp=strchr(buf,' ');
+			tmp++;
+			strcpy(buf,tmp);
+			i=strlen(buf);
+			buf[i-1]='\0';
+			file=fopen(buf,"wb");
+
+			read(sock,&file_len,sizeof(file_len));
+			while(file_len>size){
+				size+=read(sock,buf,sizeof(buf));
+				fwrite(buf,sizeof(char),sizeof(buf),file);
+			}
+			fclose(file);
+
+		}
+
+
+		pthread_mutex_unlock(&mutx);
 	
 	}
 	return NULL;

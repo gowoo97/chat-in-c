@@ -58,7 +58,9 @@ void send_msg(char* msg,int len,int sock){
 	tmp=strchr(msg,':');
 	tmp++;
 	i=0;
-
+	for(i=0;i<client_cnt;i++){
+		write(client_sockets[i],msg,len);
+	}
 	if(!strncmp(tmp,"/send",5)){
 		tmp=strchr(tmp,' ');
 		tmp++;
@@ -78,12 +80,35 @@ void send_msg(char* msg,int len,int sock){
 
 
 		fclose(file);	
+	}
+	if(!strncmp(tmp,"/down",5)){
+		tmp=strchr(tmp,' ');
+		tmp++;
+		strcpy(buf,tmp);
+		printf("%s",buf);
+		i=strlen(buf);
+		buf[i-1]='\0';
+		file=fopen(buf,"rb");
+
+		fseek(file,0,SEEK_END);
+		data_len=ftell(file);
+		fseek(file,0,SEEK_SET);
+		
+		
+
+
+		write(sock,&data_len,sizeof(data_len));
+		while(1){
+			size=fread(buf,sizeof(char),sizeof(buf),file);
+			write(sock,buf,size);
+			if(feof(file))
+				break;
+		}
+		fclose(file);
 	}	
 	
 
-	for(i=0;i<client_cnt;i++){
-		write(client_sockets[i],msg,len);
-	}
+	
 	pthread_mutex_unlock(&mutx);
 }
 
@@ -121,7 +146,6 @@ int main(){
 		
 		pthread_mutex_lock(&mutx);
 		client_sockets[client_cnt++]=ns;
-
 		pthread_mutex_unlock(&mutx);
 
 		pthread_create(&t_id,NULL,handle_cli,(void*)&ns);
