@@ -30,7 +30,6 @@ void *handle_cli(void *arg){
 	char *ptr;
 	while((str_len=read(c_sock,msg,sizeof(msg)))!=0){
 		msg[str_len]='\0';
-		printf("%s",msg);
 		send_msg(msg,str_len,c_sock);
 	}
 	pthread_mutex_lock(&mutx);
@@ -61,18 +60,17 @@ void send_msg(char* msg,int len,int sock){
 	tmp++;
 	i=0;
 
-		
+
 	if(!strncmp(tmp,"/send",5)){
 		tmp=strchr(tmp,' ');
 		tmp++;
 		strcpy(buf,tmp);
 		i=strlen(buf);
-		buf[i-1]='\0';
+		buf[i]='\0';
 		file=fopen(buf,"wb");
 			
 		read(sock,&data_len,sizeof(int));
 
-	
 
 		while(data_len>size){
 			size+=read(sock,buf,sizeof(buf));
@@ -88,7 +86,7 @@ void send_msg(char* msg,int len,int sock){
 		strcpy(buf,tmp);
 		printf("%s",buf);
 		i=strlen(buf);
-		buf[i-1]='\0';
+		buf[i]='\0';
 		file=fopen(buf,"rb");
 
 		fseek(file,0,SEEK_END);

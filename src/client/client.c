@@ -46,6 +46,10 @@ int main(){
 	clrtoeol();
 	refresh();
 	ID[strlen(ID)]='\0';
+//	initscr();
+	pthread_mutex_init(&mutx,NULL);
+
+
 	sock=socket(AF_INET,SOCK_STREAM,0);
 		
 	memset(&serv_addr,0,sizeof(serv_addr));	
@@ -91,7 +95,7 @@ void* send_msg(void* arg){
 			tmp++;
 			strcpy(buf,tmp);
 			i=strlen(buf);
-			buf[i-1]='\0';
+			buf[i]='\0';
 			file=fopen(buf,"rb");
 		
 			fseek(file,0,SEEK_END);
@@ -111,7 +115,6 @@ void* send_msg(void* arg){
 			
 		
 		}
-
 
 	
 	
@@ -145,12 +148,16 @@ void* recv_msg(void* arg){
 		tmp=strchr(msg,':');
 		tmp++;
 		strcpy(buf,tmp);
+		fputs(msg,stdout);
+
+	
+
 		if(!strncmp(buf,"/down",5)){
 			tmp=strchr(buf,' ');
 			tmp++;
 			strcpy(buf,tmp);
 			i=strlen(buf);
-			buf[i-1]='\0';
+			buf[i]='\0';
 			file=fopen(buf,"wb");
 
 			read(sock,&file_len,sizeof(file_len));
