@@ -20,8 +20,9 @@ void* recv_msg(void* arg);
 char ID[20];
 char msg[BUF_SIZE];
 char text[200];
-
-
+int my_sock;
+int x,y,max_x,max_y;
+pthread_mutex_t mutx;
 
 int main(){
 	int sock;
@@ -30,12 +31,21 @@ int main(){
 	void* thread_return;
 	int len;
 	
-//	initscr();
-	
+	initscr();
+	start_color();
+	init_pair(1,COLOR_YELLOW,COLOR_BLACK);
+	init_pair(2,COLOR_WHITE,COLOR_BLACK);
+	getyx(stdscr,y,x);
+	getmaxyx(stdscr,max_y,max_x);
+	pthread_mutex_init(&mutx,NULL);
 
-	printf("ID입력:");
-	fgets(ID,sizeof(ID)-1,stdin);
-	ID[strlen(ID)-1]='\0';
+	printw("type ID:");
+//	fgets(ID,sizeof(ID)-1,stdin);
+	scanw("%[^\n]",ID);
+	move(0,0);
+	clrtoeol();
+	refresh();
+	ID[strlen(ID)]='\0';
 	sock=socket(AF_INET,SOCK_STREAM,0);
 		
 	memset(&serv_addr,0,sizeof(serv_addr));	
@@ -47,7 +57,7 @@ int main(){
 		perror("conncet");
 		exit(1);
 	}
-
+	
 	pthread_create(&snd_thread,NULL,send_msg,(void*)&sock);
 	pthread_create(&rcv_thread,NULL,recv_msg,(void*)&sock);
 	pthread_join(snd_thread,&thread_return);
@@ -64,7 +74,11 @@ void* send_msg(void* arg){
 	int file_len,i,size;
 	char buf[20];
 	while(1){
-		fgets(msg,BUF_SIZE,stdin);
+		mvprintw(max_y-1,0,"=>");
+		refresh();
+	//	fgets(msg,BUF_SIZE,stdin);
+		scanw("%[^\n]",msg);
+		clrtoeol();
 		strcpy(text,ID);
 		strcat(text,":");
 		strcat(text,msg);	
@@ -95,7 +109,10 @@ void* send_msg(void* arg){
 
 			fclose(file);
 			
+		
 		}
+
+
 	
 	
 	}	
@@ -105,16 +122,48 @@ void* send_msg(void* arg){
 
 void* recv_msg(void* arg){
 
-	int sock=*((int*)arg);
+	int sock=*((int*)arg),i,file_len,size;
 	char msg[BUF_SIZE];
 	int str_len;
+	char *tmp;
+	char buf[20];
+	FILE *file;
 	while(1){
-	
+		
+		pthread_mutex_lock(&mutx);
+		size=0;
 		str_len=read(sock,msg,BUF_SIZE-1);
 		if(str_len==-1)
 			return (void*)-1;
 		msg[str_len]='\0';
-		fputs(msg,stdout);
+		//fputs(msg,stdout);
+		move(y,0);
+		printw("%s",msg);
+		y++;
+		move(max_y-1,3);
+		refresh();
+		tmp=strchr(msg,':');
+		tmp++;
+		strcpy(buf,tmp);
+		if(!strncmp(buf,"/down",5)){
+			tmp=strchr(buf,' ');
+			tmp++;
+			strcpy(buf,tmp);
+			i=strlen(buf);
+			buf[i-1]='\0';
+			file=fopen(buf,"wb");
+
+			read(sock,&file_len,sizeof(file_len));
+			while(file_len>size){
+				size+=read(sock,buf,sizeof(buf));
+				fwrite(buf,sizeof(char),sizeof(buf),file);
+			}
+			fclose(file);
+
+		}
+
+
+		pthread_mutex_unlock(&mutx);
 	
 	}
 	return NULL;
