@@ -21,5 +21,5 @@
   <li>send_msg()-서버로 메세지를 전송한다</li>
   <li>recv_msg()-서버로 부터 메세지를 받는다.</li>
   </ul>
-  
+  ![dia](https://user-images.githubusercontent.com/54802110/101599516-3ade5f00-3a3d-11eb-85dd-b56aedb411a0.JPG)
   
