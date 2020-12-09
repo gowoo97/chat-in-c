@@ -29,4 +29,16 @@
   
   <h1>개발결과물 사용방법</h1>
   
-  <img src="./images/스크린샷1.png"></img>
+  <img src="./images/스크린샷1.png" width="500"></img><br>
+  서버를 실행시킨후 클라이언트를 실행시키고 닉네임을 입력한다.<br>
+  <img src="./images/스크린샷2.png" width="500"></img><br>
+  대화를 나누는 장면<br>
+   <img src="./images/스크린샷3.png" width="500"></img><br>
+   /send [filename] 명령을 이용해 폴더에있는 apple.jpg를 서버로 전송한다.<br>
+    <img src="./images/스크린샷4.png" width="500"></img><br>
+    /down [filename] 명령을 이용해 서버로 부터 apple.jpg를 다운 받는다.<br>
+     <img src="./images/스크린샷5.png" width="500"></img><br>
+     /view [filename] 명령을 이용해 내폴더에 있는 사진을 3초간 띄운다.<br>
+  
+<h1>결과물의 필요성 및 활용방안</h1>
+터미널 환경에서 작동 되기 때문에 가볍다. 꼭 터미널 환경을 사용해야하는 낮은 성능의 기기에서도 사용 할 수 있다.
