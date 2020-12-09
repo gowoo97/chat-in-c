@@ -23,3 +23,10 @@
   </ul>
   ![dia](https://user-images.githubusercontent.com/54802110/101599516-3ade5f00-3a3d-11eb-85dd-b56aedb411a0.JPG)
   
+  /send [fileanme]- 클라이언트가 가지고 있는 파일을 서버로 전송한다.<br>
+  /down [filename]-서버가 가지고있는 파일을 클라이언트로 전송 한다.<br>
+  /view [filename]-클라이언트가 가지고있는 이미지 파일을 출력한다.<br>
+  
+  <h1>개발결과물 사용방법</h1>
+  
+  
