@@ -22,6 +22,7 @@ char msg[BUF_SIZE];
 char text[200];
 int my_sock;
 int x,y,max_x,max_y;
+int stop_thread=0;
 pthread_mutex_t mutx;
 
 int main(){
@@ -46,7 +47,6 @@ int main(){
 	clrtoeol();
 	refresh();
 	ID[strlen(ID)]='\0';
-//	initscr();
 	pthread_mutex_init(&mutx,NULL);
 
 
@@ -77,6 +77,7 @@ void* send_msg(void* arg){
 	FILE *file;
 	int file_len,i,size;
 	char buf[20];
+	char buf2[20];
 	while(1){
 		mvprintw(max_y-1,0,"=>");
 		refresh();
@@ -115,6 +116,21 @@ void* send_msg(void* arg){
 			
 		
 		}
+		if(!strncmp(msg,"/view",5)){
+			def_prog_mode();
+			endwin();
+			stop_thread=1;
+			tmp=strchr(msg,' ');
+			tmp++;
+			strcpy(buf,"./imcat ");
+			strcpy(buf2,tmp);
+			strcat(buf,buf2);
+			system(buf);
+			sleep(3);
+			reset_prog_mode();
+			refresh();
+			stop_thread=0;
+		}
 
 	
 	
@@ -125,7 +141,7 @@ void* send_msg(void* arg){
 
 void* recv_msg(void* arg){
 
-	int sock=*((int*)arg),i,file_len,size;
+	int sock=*((int*)arg),i,file_len,size,tmp_size;
 	char msg[BUF_SIZE];
 	int str_len;
 	char *tmp;
@@ -136,6 +152,7 @@ void* recv_msg(void* arg){
 		pthread_mutex_lock(&mutx);
 		size=0;
 		str_len=read(sock,msg,BUF_SIZE-1);
+		while(stop_thread);
 		if(str_len==-1)
 			return (void*)-1;
 		msg[str_len]='\0';
@@ -162,14 +179,15 @@ void* recv_msg(void* arg){
 
 			read(sock,&file_len,sizeof(file_len));
 			while(file_len>size){
-				size+=read(sock,buf,sizeof(buf));
+				tmp_size=read(sock,buf,sizeof(buf));
 				fwrite(buf,sizeof(char),sizeof(buf),file);
+				size+=tmp_size;
 			}
 			fclose(file);
 
 		}
-
-
+		
+	
 		pthread_mutex_unlock(&mutx);
 	
 	}

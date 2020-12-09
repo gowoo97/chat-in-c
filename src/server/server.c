@@ -47,7 +47,7 @@ void *handle_cli(void *arg){
 }
 
 void send_msg(char* msg,int len,int sock){
-	int i,data_len,size;
+	int i,data_len,size,tmp_size;
 	char *tmp;
 	FILE *file;
 	char buf[20];
@@ -73,8 +73,9 @@ void send_msg(char* msg,int len,int sock){
 
 
 		while(data_len>size){
-			size+=read(sock,buf,sizeof(buf));
-			fwrite(buf,sizeof(char),sizeof(buf),file);
+			tmp_size=read(sock,buf,sizeof(buf));
+			fwrite(buf,sizeof(char),tmp_size,file);
+			size+=tmp_size;
 		}
 
 
